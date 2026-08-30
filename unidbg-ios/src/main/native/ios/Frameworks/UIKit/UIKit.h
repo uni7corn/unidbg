@@ -435,6 +435,13 @@ BOOL UIAccessibilityDarkerSystemColorsEnabled();
 
 @interface NSConstantArray : NSArray
 - (unsigned long)count;
+- (id)objectAtIndex:(NSUInteger)index;
+@end
+
+@interface NSConstantDictionary : NSDictionary
+- (NSUInteger)count;
+- (id)objectForKey:(id)aKey;
+- (NSEnumerator *)keyEnumerator;
 @end
 
 @interface NSConstantIntegerNumber : NSNumber {

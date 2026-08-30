@@ -659,9 +659,59 @@ BOOL UIAccessibilityDarkerSystemColorsEnabled() {
 @implementation BRQuery
 @end
 
+// Compiler-emitted constant array literal layout (__objc_arrayobj):
+//   isa | count | id *objs
+struct __NSConstantArray {
+    Class isa;
+    unsigned long count;
+    const id *objs;
+};
+
+// Compiler-emitted constant dictionary literal layout (__objc_dictobj):
+//   isa | options | count | id *keys | id *objs
+// keys[] is immediately followed by objs[], both sized `count`.
+struct __NSConstantDictionary {
+    Class isa;
+    unsigned long options;
+    unsigned long count;
+    const id *keys;
+    const id *objs;
+};
+
 @implementation NSConstantArray
 - (unsigned long)count {
-    return 0;
+    return ((struct __NSConstantArray *)self)->count;
+}
+- (id)objectAtIndex:(NSUInteger)index {
+    struct __NSConstantArray *a = (struct __NSConstantArray *)self;
+    if (index >= a->count) {
+        [NSException raise:NSRangeException format:@"index %lu beyond bounds [0 .. %lu]", (unsigned long)index, a->count ? a->count - 1 : 0];
+    }
+    return (id)a->objs[index];
+}
+@end
+
+@implementation NSConstantDictionary
+- (NSUInteger)count {
+    return (NSUInteger)((struct __NSConstantDictionary *)self)->count;
+}
+- (id)objectForKey:(id)aKey {
+    struct __NSConstantDictionary *d = (struct __NSConstantDictionary *)self;
+    for (unsigned long i = 0; i < d->count; i++) {
+        id key = (id)d->keys[i];
+        if (key == aKey || [key isEqual:aKey]) {
+            return (id)d->objs[i];
+        }
+    }
+    return nil;
+}
+- (NSEnumerator *)keyEnumerator {
+    struct __NSConstantDictionary *d = (struct __NSConstantDictionary *)self;
+    NSMutableArray *keys = [NSMutableArray arrayWithCapacity:(NSUInteger)d->count];
+    for (unsigned long i = 0; i < d->count; i++) {
+        [keys addObject:(id)d->keys[i]];
+    }
+    return [keys objectEnumerator];
 }
 @end
 
